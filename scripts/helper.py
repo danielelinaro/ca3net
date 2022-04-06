@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 Helper functions used here and there
 author: András Ecker, last update: 06.2019
@@ -20,6 +20,13 @@ Erev_E = 0.0*mV
 Erev_I = -70.0*mV
 len_sim = 10000  # ms
 volume_cond = 1e9*nS / 3.54e5  # 1/3.54 S/m (`_estimate_LFP()` assumes 10 um distance...)
+
+
+def make_filename(prefix, n_neurons, place_cell_ratio, dur, linear, suffix):
+    fname = f"{prefix}_N={n_neurons}_ratio={place_cell_ratio:.1f}_dur={dur:.0f}"
+    if linear:
+        fname += "_linear"
+    return fname + suffix
 
 
 # ========== process Brian2 monitors ==========

@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 Functions used for generating hippocampal like spike trains (inhomogeneous Poisson process)
 Setup: many repetitions on a circular track or (mapped) linear [0, 2pi] track
@@ -122,7 +122,8 @@ def inhom_poisson(lambda_, t_max, phi_start, linear, seed, phase0=0.0):
     :return: inhom_poisson_proc: inhomogenos Poisson process representing the spike train of a place cell
     """
 
-    poisson_proc = hom_poisson(lambda_, 10000, t_max, seed)  # hard coded 10000 works with 20Hz rate and 405sec spike train
+    #poisson_proc = hom_poisson(lambda_, 10000, t_max, seed)  # hard coded 10000 works with 20Hz rate and 405sec spike train
+    poisson_proc = hom_poisson(lambda_, int(lambda_ * t_max * 2), t_max, seed)
 
     # keep only a subset of spikes
     lambda_t = evaluate_lambda_t(poisson_proc, phi_start, linear, phase0)

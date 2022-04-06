@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 Generates hippocampal like spike trains (see also helper file: `poisson_proc.py`)
 authors: András Ecker, Eszter Vértes, Szabolcs Káli last update: 10.2018
@@ -8,14 +8,14 @@ import os, pickle
 import numpy as np
 from tqdm import tqdm  # progress bar
 from poisson_proc import hom_poisson, inhom_poisson
-from helper import save_place_fields, refractoriness 
+from helper import save_place_fields, refractoriness, make_filename
 
 
 base_path = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2])
 
 outfield_rate = 0.1  # avg. firing rate outside place field [Hz]
 infield_rate = 20.0  # avg. in-field firing rate [Hz]
-t_max = 405.0  # [s]
+t_max = 3600.0  # [s]
 
 
 def generate_spike_train(n_neurons, place_cell_ratio, linear, ordered=True, seed=1234):
@@ -47,9 +47,8 @@ def generate_spike_train(n_neurons, place_cell_ratio, linear, ordered=True, seed
 
         if linear:
             phi_starts -= 0.1*np.pi  # shift half a PF against boundary effects (mid_PFs will be in [0, 2*np.pi]...)
-            pklf_name = os.path.join(base_path, "files", "PFstarts_%s_linear.pkl"%place_cell_ratio)
-        else:
-            pklf_name = os.path.join(base_path, "files", "PFstarts_%s.pkl"%place_cell_ratio)
+        f_out = make_filename('PFstarts', n_neurons, place_cell_ratio, t_max, linear, ".pkl")
+        pklf_name = os.path.join(base_path, "files", f_out)
 
     else:
         np.random.seed(seed+1)
@@ -59,9 +58,8 @@ def generate_spike_train(n_neurons, place_cell_ratio, linear, ordered=True, seed
 
         if linear:
             phi_starts -= 0.1*np.pi  # shift half a PF against boundary effects (mid_PFs will be in [0, 2*np.pi]...)
-            pklf_name = os.path.join(base_path, "files", "PFstarts_%s_linear_no.pkl"%place_cell_ratio)
-        else:
-            pklf_name = os.path.join(base_path, "files", "PFstarts_%s_no.pkl"%place_cell_ratio)
+        f_out = make_filename('PFstarts', n_neurons, place_cell_ratio, t_max, linear, "_no.pkl")
+        pklf_name = os.path.join(base_path, "files", f_out)
 
 
     place_fields = {neuron_id:phi_starts[i] for i, neuron_id in enumerate(place_cells)}
@@ -73,11 +71,12 @@ def generate_spike_train(n_neurons, place_cell_ratio, linear, ordered=True, seed
         if neuron_id in place_fields:
             spike_train = inhom_poisson(infield_rate, t_max, place_fields[neuron_id], linear, seed)
         else:
-            spike_train = hom_poisson(outfield_rate, 100, t_max, seed)
+            spike_train = hom_poisson(outfield_rate, int(outfield_rate * t_max * 2), t_max, seed)
         spike_trains.append(spike_train)
         seed += 1
 
     return spike_trains
+
 
 
 if __name__ == "__main__":
@@ -86,8 +85,9 @@ if __name__ == "__main__":
     place_cell_ratio = 0.5
     linear = True
 
-    f_out = "spike_trains_%.1f_linear.npz"%place_cell_ratio if linear else "spike_trains_%.1f.npz"%place_cell_ratio; ordered = True
-    #f_out = "intermediate_spike_trains_%.1f_linear.npz"%place_cell_ratio if linear else "intermediate_spike_trains_%.1f.npz"%place_cell_ratio; ordered = False
+    f_out = make_filename('spike_trains', n_neurons, place_cell_ratio, t_max, linear, ".npz")
+
+    ordered = True
 
     spike_trains = generate_spike_train(n_neurons, place_cell_ratio, linear=linear, ordered=ordered)
     spike_trains = refractoriness(spike_trains)  # clean spike train (based on refractory period)
