@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 Loads in hippocampal like spike train (produced by `generate_spike_train.py`) and runs STD learning rule in a recurrent spiking neuron population
 -> creates weight matrix for PC population, used by `spw*` scripts
@@ -12,7 +12,7 @@ import random as pyrandom
 from brian2 import *
 set_device("cpp_standalone")  # speed up the simulation with generated C++ code
 import matplotlib.pyplot as plt
-from helper import load_spike_trains, save_wmx
+from helper import load_spike_trains, save_wmx, make_filename
 from plots import plot_STDP_rule, plot_wmx, plot_wmx_avg, plot_w_distr, save_selected_w, plot_weights
 
 
@@ -22,7 +22,7 @@ connection_prob_PC = 0.1
 nPCs = 8000
 
 
-def learning(spiking_neurons, spike_times, taup, taum, Ap, Am, wmax, w_init):
+def learning(spiking_neurons, spike_times, taup, taum, Ap, Am, wmax, w_init, t_max):
     """
     Takes a spiking group of neurons, connects the neurons sparsely with each other, and learns the weight 'pattern' via STDP:
     exponential STDP: f(s) = A_p * exp(-s/tau_p) (if s > 0), where s=tpost_{spike}-tpre_{spike}
@@ -61,7 +61,7 @@ def learning(spiking_neurons, spike_times, taup, taum, Ap, Am, wmax, w_init):
     STDP.connect(condition="i!=j", p=connection_prob_PC)
     STDP.w = w_init
 
-    run(400*second, report="text")
+    run(t_max*second, report="text")
 
     weightmx = np.zeros((nPCs, nPCs))
     weightmx[STDP.i[:], STDP.j[:]] = STDP.w[:]
@@ -77,12 +77,12 @@ if __name__ == "__main__":
         STDP_mode = "sym"
     assert STDP_mode in ["asym", "sym"]
 
+    n_neurons = 8000
     place_cell_ratio = 0.5
+    t_max = 405
     linear = True
-    f_in = "spike_trains_%.1f_linear.npz"%place_cell_ratio if linear else "spike_trains_%.1f.npz"%place_cell_ratio
-    f_out = "wmx_%s_%.1f_linear.pkl"%(STDP_mode, place_cell_ratio) if linear else "wmx_%s_%.1f.pkl"%(STDP_mode, place_cell_ratio)
-    #f_in = "intermediate_spike_trains_%.1f_linear.npz"%place_cell_ratio if linear else "intermediate_spike_trains_%.1f.npz"%place_cell_ratio
-    #f_out = "intermediate_wmx_%s_%.1f_linear.pkl"%(STDP_mode, place_cell_ratio) if linear else "intermediate_wmx_%s_%.1f.pkl"%(STDP_mode, place_cell_ratio)
+    f_in = make_filename("spike_trains", n_neurons, place_cell_ratio, t_max, linear, ".npz")
+    f_out = make_filename(f"wmx_{STDP_mode}", n_neurons, place_cell_ratio, t_max, linear, ".pkl")
 
     # STDP parameters (see `optimization/analyse_STDP.py`)
     if STDP_mode == "asym":
@@ -101,8 +101,7 @@ if __name__ == "__main__":
 
     npzf_name = os.path.join(base_path, "files", f_in)
     spiking_neurons, spike_times = load_spike_trains(npzf_name)
-
-    weightmx = learning(spiking_neurons, spike_times, taup, taum, Ap, Am, wmax, w_init)
+    weightmx = learning(spiking_neurons, spike_times, taup, taum, Ap, Am, wmax, w_init, t_max - 5)
     weightmx *= scale_factor  # quick and dirty additional scaling! (in an ideal world the STDP parameters should be changed to include this scaling...)
 
     pklf_name = os.path.join(base_path, "files", f_out)

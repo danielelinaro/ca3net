@@ -15,7 +15,7 @@ base_path = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2])
 
 outfield_rate = 0.1  # avg. firing rate outside place field [Hz]
 infield_rate = 20.0  # avg. in-field firing rate [Hz]
-t_max = 3600.0  # [s]
+t_max = 405.0  # [s]
 
 
 def generate_spike_train(n_neurons, place_cell_ratio, linear, ordered=True, seed=1234):
