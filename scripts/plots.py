@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 Helper functions to plot dynamics, weight matrix and couple of other things
 authors: András Ecker, Bence Bagi last update: 02.2019
@@ -531,26 +531,31 @@ def plot_STDP_rule(taup, taum, Ap, Am, save_name):
     fig.savefig(fig_name)
 
 
-def plot_wmx(wmx, save_name):
+def plot_wmx(wmx, save_name=None, ax=None):
     """
     Saves figure with the weight matrix
     :param wmx: numpy array representing the weight matrix
     :param save_name: name of saved img
     """
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(1, 1, 1)
+    if ax is None:
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(1, 1, 1)
+    else:
+        fig = ax.get_figure()
     i = ax.imshow(wmx*1e9, cmap="cividis", origin="lower", interpolation="nearest")  # nS conversion
-    fig.colorbar(i)
+    #fig.colorbar(i)
+    plt.colorbar(i, ax=ax)
     ax.set_title("Learned synaptic weights (nS)")
     ax.set_xlabel("Target neuron")
     ax.set_ylabel("Source neuron")
 
-    fig_name = os.path.join(fig_dir, "%s.png"%save_name)
-    fig.savefig(fig_name)
+    if save_name is not None:
+        fig_name = os.path.join(fig_dir, "%s.png"%save_name)
+        fig.savefig(fig_name)
 
 
-def plot_wmx_avg(wmx, n_pops, save_name):
+def plot_wmx_avg(wmx, n_pops, save_name=None, ax=None):
     """
     Saves figure with the averaged weight matrix (better view as a whole)
     :param wmx: numpy array representing the weight matrix
@@ -567,20 +572,25 @@ def plot_wmx_avg(wmx, n_pops, save_name):
             tmp = wmx[int(i*pop_size):int((i+1)*pop_size), int(j*pop_size):int((j+1)*pop_size)]
             mean_wmx[i, j] = np.mean(tmp)
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(1, 1, 1)
+    if ax is None:
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(1, 1, 1)
+    else:
+        fig = ax.get_figure()
 
     i = ax.imshow(mean_wmx*1e9, cmap="cividis", origin="lower", interpolation="nearest")
-    fig.colorbar(i)
+    #fig.colorbar(i)
+    plt.colorbar(i, ax=ax)
     ax.set_title("Learned avg. synaptic weights (nS)")
     ax.set_xlabel("Target neuron")
     ax.set_ylabel("Source neuron")
 
-    fig_name = os.path.join(fig_dir, "%s.png"%save_name)
-    fig.savefig(fig_name)
+    if save_name is not None:
+        fig_name = os.path.join(fig_dir, "%s.png"%save_name)
+        fig.savefig(fig_name)
 
 
-def plot_w_distr(wmx, save_name):
+def plot_w_distr(wmx, save_name=None, ax=None, xlim=None, ylim=None):
     """
     Saves figure with the distribution of the weights
     :param wmx: numpy array representing the weight matrix
@@ -592,31 +602,45 @@ def plot_w_distr(wmx, save_name):
     log10wmx_nonzero = np.log10(wmx_nonzero)
     print("mean(nonzero weights): %s (nS)" % np.mean(wmx_nonzero))
 
-    fig = plt.figure(figsize=(10, 8))
+    if ax is None:
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2)
+    else:
+        ax,ax2 = ax
+        fig = ax.get_figure()
 
-    ax = fig.add_subplot(2, 1, 1)
     ax.hist(wmx_nonzero, bins=150)
     ax.set_title("Distribution of synaptic weights")
     ax.set_xlabel("Synaptic weights (nS)")
     ax.set_ylabel("Count")
-    plt.yscale("log")
+    ax.set_yscale("log")
 
-    ax2 = fig.add_subplot(2, 1, 2)
     ax2.hist(log10wmx_nonzero, bins=150, color="red")
     ax2.set_title("Distribution of synaptic weights")
     ax2.set_xlabel("log10(synaptic weights(nS))")
     ax2.set_ylabel("Count")
-    plt.yscale("log")
+    ax2.set_yscale("log")
+
+    if xlim is not None:
+        ax.set_xlim(xlim)
+        ax2.set_xlim(np.log10(xlim))
+
+    if ylim is not None:
+        ax.set_ylim(ylim)
+        ax2.set_ylim(ylim)
 
     sns.despine()
-    fig.tight_layout()
-    fig_name = os.path.join(fig_dir, "%s.png"%save_name)
-    fig.savefig(fig_name)
+
+    if save_name is not None:
+        fig.tight_layout()
+        fig_name = os.path.join(fig_dir, "%s.png"%save_name)
+        fig.savefig(fig_name)
 
 
 def save_selected_w(wmx, selection):
     """
-    Saves the incomming weights of some selected neurons into a dictionary
+    Saves the incoming weights of some selected neurons into a dictionary
     :param wmx: numpy array representing the weight matrix
     :param selection: numpa array of selected neuron IDs
     """
@@ -624,27 +648,33 @@ def save_selected_w(wmx, selection):
     return {i:wmx[:, i] for i in selection}
 
 
-def plot_weights(incomming_weights, save_name):
+def plot_weights(incoming_weights, save_name=None, ax=None, ylim=None):
     """
     Saves figure with some selected weights
-    :param incomming_weights: dictionary storing the input weights of some neurons (see `save_selected_w()`)
+    :param incoming_weights: dictionary storing the input weights of some neurons (see `save_selected_w()`)
     :param save_name: name of saved img
     """
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(1, 1, 1)
+    if ax is None:
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(1, 1, 1)
+    else:
+        fig = ax.get_figure()
     sns.despine()
 
-    for i, val in incomming_weights.items():
+    for i, val in incoming_weights.items():
         ax.plot(val*1e9, alpha=0.5, label="%i"%i)  # nS conversion
-    ax.set_title("Incomming exc. weights")
+    ax.set_title("Incoming exc. weights")
     ax.set_xlabel("Neuron ID")
     ax.set_ylabel("Weight (nS)")
     ax.set_xlim([0, nPCs])
+    if ylim is not None:
+        ax.set_ylim(ylim)
     ax.legend()
 
-    fig_name = os.path.join(fig_dir, "%s.png"%save_name)
-    fig.savefig(fig_name)
+    if save_name is not None:
+        fig_name = os.path.join(fig_dir, "%s.png"%save_name)
+        fig.savefig(fig_name)
 
 
 def plot_summary_replay(multipliers, replay, rates_PC, rates_BC):
