@@ -40,23 +40,21 @@ def psth(spike_trains, binwidth, interval=None):
 
 def make_gamma_spike_train(k, rate, tend=None, Nev=None, refractory_period=0, random_state=None):
     from scipy.stats import gamma
-    if Nev is None and tend is not None:
-        Nev = int(np.ceil(tend * rate * 1.2))
-    ISIs = []
-    while len(ISIs) < Nev:
-        ISI = gamma.rvs(k, loc=0, scale=1 / (k * rate), size=1, random_state=random_state)
-        if ISI > refractory_period:
-            ISIs.append(ISI)
+    if Nev is None:
+        Nev = int(np.ceil(tend * rate))
+    ISIs = gamma.rvs(k, loc=0, scale=1 / (k * rate), size=int(1.2 * Nev), random_state=random_state)
+    ISIs = ISIs[ISIs > refractory_period]
     spks = np.cumsum(ISIs)
     if tend is not None:
-        spks = spks[spks < tend]
+        spks = spks[spks <= tend]
+    else:
+        spks = spks[:Nev]
     return spks
 
 
 def make_inhomogeneous_gamma_spike_train(k, rate_fun, max_rate, tend=None, Nev=None,
                                          refractory_period=0, random_state=None, full_output=False):
-    # first generate homogeneous gamma spike times with no refractory period:
-    # we will enforce the refractory period later
+    # first generate homogeneous gamma spike times with no refractory period: we will enforce it later
     all_spikes = make_gamma_spike_train(k, max_rate, tend, Nev, refractory_period=0, random_state=random_state)
     prob = rate_fun(all_spikes) / max_rate
     if random_state == None:

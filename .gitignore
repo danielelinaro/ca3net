@@ -10,6 +10,8 @@ scripts/optimization/Mishra_2016/
 scripts/optimization/checkpoints/
 .DS_Store
 *.tar
+*.pdf
+*.npz
 scripts/var
 __pycache__
 nbconvert

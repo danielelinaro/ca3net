@@ -590,7 +590,7 @@ def plot_wmx_avg(wmx, n_pops, save_name=None, ax=None):
         fig.savefig(fig_name)
 
 
-def plot_w_distr(wmx, save_name=None, ax=None, xlim=None, ylim=None):
+def plot_w_distr(wmx, bins=50, save_name=None, ax=None, xlim=None, ylim=None):
     """
     Saves figure with the distribution of the weights
     :param wmx: numpy array representing the weight matrix
@@ -610,21 +610,26 @@ def plot_w_distr(wmx, save_name=None, ax=None, xlim=None, ylim=None):
         ax,ax2 = ax
         fig = ax.get_figure()
 
-    ax.hist(wmx_nonzero, bins=150)
+    n,edges = np.histogram(wmx_nonzero, bins=bins, range=xlim)
+    dw = np.diff(edges[:2])[0]
+    ax.bar(edges[:-1] + dw/2, n, facecolor=[.8,.4,.8], width=dw*0.8)
     ax.set_title("Distribution of synaptic weights")
     ax.set_xlabel("Synaptic weights (nS)")
     ax.set_ylabel("Count")
     ax.set_yscale("log")
+    if xlim is not None:
+        ax.set_xlim(xlim)
+        xlim = np.log10(xlim)
 
-    ax2.hist(log10wmx_nonzero, bins=150, color="red")
+    n,edges = np.histogram(log10wmx_nonzero, bins=bins, range=xlim)
+    dw = np.diff(edges[:2])[0]
+    ax2.bar(edges[:-1] + dw/2, n, facecolor=[.4,.8,.4], width=dw*0.8)
     ax2.set_title("Distribution of synaptic weights")
     ax2.set_xlabel("log10(synaptic weights(nS))")
     ax2.set_ylabel("Count")
     ax2.set_yscale("log")
-
     if xlim is not None:
-        ax.set_xlim(xlim)
-        ax2.set_xlim(np.log10(xlim))
+        ax2.set_xlim(xlim)
 
     if ylim is not None:
         ax.set_ylim(ylim)
