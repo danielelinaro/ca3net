@@ -314,8 +314,9 @@ def save_wmx(weightmx, pklf_name):
     :param weightmx: synaptic weight matrix to save
     :param pklf_name: file name of the saved weight matrix
     """
-
-    np.fill_diagonal(weightmx, 0.0)
+    from scipy import sparse
+    if not sparse.issparse(weightmx):
+        np.fill_diagonal(weightmx, 0.0)
     with open(pklf_name, "wb") as f:
         pickle.dump(weightmx, f, protocol=pickle.HIGHEST_PROTOCOL)
 
