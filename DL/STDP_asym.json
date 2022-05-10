@@ -1,0 +1,16 @@
+{
+    "spike_times_file": "spike_times_a-thorny_place_cells.npz",
+    "t_end": 3600,
+    "taup": 20,
+    "taum": 20,
+    "Ap": 0.01,
+    "Am": -0.01,
+    "wmax": 4e-8,
+    "scale_factor": 1.27,
+    "w_init": 1e-10,
+    "connectivity": {
+	"pre":  ["thorny", "thorny",   "a-thorny", "a-thorny"],
+        "post": ["thorny", "a-thorny", "thorny",   "a-thorny"],
+        "prob": [0.1, 0.5, 0.5, 0.2]
+    }
+}
