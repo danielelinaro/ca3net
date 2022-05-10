@@ -8,10 +8,13 @@ files/*npz
 scripts/output/
 scripts/optimization/Mishra_2016/
 scripts/optimization/checkpoints/
+tmp
+output
 .DS_Store
 *.tar
 *.pdf
 *.npz
+*.log
 scripts/var
 __pycache__
 nbconvert
