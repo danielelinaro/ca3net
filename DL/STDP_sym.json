@@ -1,5 +1,5 @@
 {
-    "spike_times_file": "spike_times_a-thorny_place_cells.npz",
+    "spike_times_file": "spike_times_place_cells_ratio=0.5_0.2.npz",
     "t_end": 600,
     "taup": 62.5,
     "taum": 62.5,
