@@ -12,14 +12,24 @@ def make_filename(prefix, n_neurons, place_cell_ratio, dur, linear, suffix):
     return fname + suffix
 
 
-def rasterplot(spike_trains, max_neurons=None, ax=None, color='k', marker='.', markersize=2):
+def rasterplot(spike_trains, max_neurons=None, ax=None, **kwargs):
     if max_neurons is None or max_neurons > len(spike_trains):
         max_neurons = len(spike_trains)
     if ax is None:
+        import matplotlib.pyplot as plt
         ax = plt.gca()
     n_spikes = list(map(len, spike_trains))
+    kwargs['ls'] = ''
+    if 'marker' not in kwargs:
+        kwargs['marker'] = '.'
+    if 'markersize' not in kwargs and 'ms' not in kwargs:
+        kwargs['ms'] = 3
+    if 'color' not in kwargs and 'col' not in kwargs:
+        kwargs['color'] = 'k'
     for i in range(max_neurons):
-        ax.plot(spike_trains[i], i + 1 + np.zeros(n_spikes[i]), marker, color=color, markersize=markersize)
+        ax.plot(spike_trains[i], i + 1 + np.zeros(n_spikes[i]), **kwargs)
+        if 'label' in kwargs:
+            kwargs.pop('label')
 
 
 def psth(spike_trains, binwidth, interval=None):

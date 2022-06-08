@@ -538,6 +538,7 @@ def plot_wmx(wmx, save_name=None, ax=None):
     :param save_name: name of saved img
     """
 
+    n_pre, n_post = wmx.shape
     if ax is None:
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(1, 1, 1)
@@ -549,6 +550,8 @@ def plot_wmx(wmx, save_name=None, ax=None):
     ax.set_title("Learned synaptic weights (nS)")
     ax.set_xlabel("Target neuron")
     ax.set_ylabel("Source neuron")
+    ax.set_xticks(np.linspace(0, n_post, 5))
+    ax.set_yticks(np.linspace(0, n_pre, 5))
 
     if save_name is not None:
         fig_name = os.path.join(fig_dir, "%s.png"%save_name)
@@ -563,9 +566,10 @@ def plot_wmx_avg(wmx, n_pops, save_name=None, ax=None):
     :param save_name: name of saved img
     """
 
-    assert nPCs % n_pops == 0
-
-    pop_size = int(nPCs / n_pops)
+    #assert nPCs % n_pops == 0
+    n_pre, n_post = wmx.shape
+    n_cells = min(n_pre, n_post)
+    pop_size = int(n_cells / n_pops)
     mean_wmx = np.zeros((n_pops, n_pops))
     for i in range(n_pops):
         for j in range(n_pops):
@@ -584,6 +588,9 @@ def plot_wmx_avg(wmx, n_pops, save_name=None, ax=None):
     ax.set_title("Learned avg. synaptic weights (nS)")
     ax.set_xlabel("Target neuron")
     ax.set_ylabel("Source neuron")
+    ticks = np.linspace(0, n_pops, 5)
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
 
     if save_name is not None:
         fig_name = os.path.join(fig_dir, "%s.png"%save_name)
@@ -660,6 +667,7 @@ def plot_weights(incoming_weights, save_name=None, ax=None, ylim=None):
     :param save_name: name of saved img
     """
 
+    n_cells = list(incoming_weights.values())[0].size
     if ax is None:
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(1, 1, 1)
@@ -672,7 +680,7 @@ def plot_weights(incoming_weights, save_name=None, ax=None, ylim=None):
     ax.set_title("Incoming exc. weights")
     ax.set_xlabel("Neuron ID")
     ax.set_ylabel("Weight (nS)")
-    ax.set_xlim([0, nPCs])
+    ax.set_xlim([0, n_cells])
     if ylim is not None:
         ax.set_ylim(ylim)
     ax.legend()

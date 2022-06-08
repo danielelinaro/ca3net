@@ -9,21 +9,26 @@ import numpy as np
 from numpy.random import RandomState, SeedSequence, MT19937
 import matplotlib.pyplot as plt
 
-from utils import *
+from .utils import *
+
+
+__all__ = ['pos', 'time_constant', 'firing_rate']
+
 
 prog_name = os.path.basename(sys.argv[0])
+
 
 def pos(t, speed, length):
     return (speed * t) % length
 
 
-def time_constant(x, middle_PF, sigma_PF):
+def time_constant(x, middle_PF, sigma_PF, track_length):
     return np.exp(-(x - middle_PF)**2 / (2 * (sigma_PF/(2*np.pi)*track_length)**2))
 
 
 def firing_rate(t, max_rate, length_PF, start_PF, middle_PF, sigma_PF, animal_speed, track_length, ftheta):
     x = pos(t, animal_speed, track_length)
-    rate = max_rate * time_constant(x, middle_PF, sigma_PF) * \
+    rate = max_rate * time_constant(x, middle_PF, sigma_PF, track_length) * \
                 np.cos(2 * np.pi * ftheta * t + \
                        np.pi / length_PF * (x - start_PF))
     if np.isscalar(t):
