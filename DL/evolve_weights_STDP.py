@@ -13,9 +13,10 @@ prog_name = os.path.basename(sys.argv[0])
 def usage():
     print(f'usage: {prog_name} [<options>] <config_file>')
     print( '')
-    print( '    -o, --output   output file name')
-    print( '    -f, --force    force overwrite of existing data file')
-    print( '    -h, --help     print this help message and exit')
+    print( '    -i, --spike-times  file containing input spike times')
+    print( '    -o, --output       output file name')
+    print( '    -f, --force        force overwrite of existing data file')
+    print( '    -h, --help         print this help message and exit')
     print( '')
     
 if __name__ == '__main__':
@@ -27,7 +28,8 @@ if __name__ == '__main__':
     k = 1
     n_args = len(sys.argv)
 
-    output_file = 'synaptic_weights.npz'
+    output_file = None
+    spike_times_file = None
     force = False
     
     while k < n_args:
@@ -37,16 +39,15 @@ if __name__ == '__main__':
             k += 1
         elif arg in ('-f', '--force'):
             force = True
+        elif arg in ('-i', '--spike-times'):
+            spike_times_file = sys.argv[k+1]
+            k += 1
         else:
             break
         k += 1
         
     if k == n_args:
         usage()
-        sys.exit(1)
-
-    if os.path.isfile(output_file) and not force:
-        print(f'{prog_name}: output file "{output_file}" exists: use -f to overwrite')
         sys.exit(1)
 
     config_file = sys.argv[k]
@@ -69,12 +70,24 @@ if __name__ == '__main__':
     Ap *= wmax
     Am *= wmax
 
-    spike_times_file = config['spike_times_file']
+    if spike_times_file is None:
+        spike_times_file = config['spike_times_file']
     if not os.path.isfile(spike_times_file):
         print(f'{prog_name}: {spike_times_file}: no such file.')
         sys.exit(3)
-        
+
+    if output_file is None:
+        if 'spike_times' in spike_times_file:
+            output_file = spike_times_file.replace('spike_times', 'weights')
+        else:
+            output_file = 'synaptic_weights.npz'
+    if os.path.isfile(output_file) and not force:
+        print(f'{prog_name}: output file "{output_file}" exists: use -f to overwrite')
+        sys.exit(1)
+
     data = np.load(spike_times_file, allow_pickle=True)
+    spike_times_config = data['config'].item()
+    place_cell = data['place_cell'].item()
     spike_trains = data['spike_trains'].item()
     cell_types = list(spike_trains.keys())
     if t_end is None:
@@ -96,7 +109,7 @@ if __name__ == '__main__':
     connections = config['connectivity']
 
     synapses = {key: {} for key in set(connections['pre'])}
-    for pre,post,prob in zip(connections['pre'], connections['post'], connections['prob']):
+    for k,(pre,post,prob) in enumerate(zip(connections['pre'], connections['post'], connections['prob'])):
         synapses[pre][post] = Synapses(spike_gen_group[pre], spike_gen_group[post],
                                        """
                                        w : 1
@@ -111,7 +124,21 @@ if __name__ == '__main__':
                                        A_postsyn += Am
                                        w = clip(w + A_presyn, 0, wmax)
                                        """)
-        synapses[pre][post].connect(condition='i!=j', p=prob)
+        if prob < 0:
+            pc_ratio = spike_times_config['place_cell_ratio'][pre]
+            pre_centers = np.linspace(0, n_cells[pre], n_cells[post]+2)[1:-1]
+            x = np.arange(n_cells[pre])
+            n_pre = connections['n_pre'][k]
+            sigma = -prob
+            for j,mu in enumerate(pre_centers):
+                p = (n_pre / pc_ratio) / (sigma * np.sqrt(2*np.pi)) * np.exp(-0.5 * ((x - mu) / sigma)**2)
+                i, = np.where((np.random.uniform(size=n_cells[pre]) <= p) & place_cell[pre])
+                synapses[pre][post].connect(i=i, j=j)
+                print(f'Connected {i.size} presynaptic place cells to postsynaptic neuron #{j}.')
+        elif prob == 1:
+            synapses[pre][post].connect(i=np.arange(n_cells[pre]), j=np.arange(n_cells[post]))
+        else:
+            synapses[pre][post].connect(condition='i!=j', p=prob)
         synapses[pre][post].w = w_init
         
     net = Network()

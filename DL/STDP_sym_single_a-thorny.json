@@ -1,0 +1,17 @@
+{
+    "spike_times_file": "spike_times_a-thorny_rate=0.1_N_thorny=8000.npz",
+    "t_end": 600,
+    "taup": 62.5,
+    "taum": 62.5,
+    "Ap": 4e-3,
+    "Am": 4e-3,
+    "wmax": 2e-8,
+    "scale_factor": 0.62,
+    "w_init": 1e-10,
+    "connectivity": {
+	"pre":  ["thorny", "thorny"],
+        "post": ["thorny", "a-thorny"],
+        "prob": [0.1, #SIGMA#],
+	"n_pre": [null, 10]
+    }
+}

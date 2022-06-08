@@ -92,6 +92,7 @@ if __name__ == '__main__':
     max_rate          = config['max_rate']            # [spike/s]
     baseline_rate     = config['baseline_rate']       # [Hz]
     length_PF         = config['place_field_length']  # [cm]
+    center_PF         = config['place_field_center'] if 'place_field_center' in config else None # [1]
     PC_ratio          = config['place_cell_ratio']
     refractory_period = config['refractory_period']   # [s]
     lap_time          = track_length / animal_speed   # [s]
@@ -110,7 +111,15 @@ if __name__ == '__main__':
     place_cell = {}
     spikes = {}
     for cell_type in cell_types:
-        middle_PF[cell_type] = np.sort(track_length * master_rs.uniform(size=n_neurons[cell_type]))
+        if center_PF is not None:
+            middle = master_rs.normal(loc=center_PF[cell_type][0],
+                                      scale=center_PF[cell_type][1],
+                                      size=n_neurons[cell_type])
+            middle[middle < 0] = 0
+            middle[middle > 1] = 1
+        else:
+            middle = master_rs.uniform(size=n_neurons[cell_type])
+        middle_PF[cell_type] = np.sort(track_length * middle)
         start_PF[cell_type] = (middle_PF[cell_type] - length_PF[cell_type] / 2) % track_length
         sigma_PF[cell_type] = length_PF[cell_type] / 2 / track_length * 2 * np.pi / 3
         phi_PF_rad[cell_type] = length_PF[cell_type] / (2 * np.pi)
@@ -180,5 +189,6 @@ if __name__ == '__main__':
                 plt.savefig(f'{cell_type}_{neuron_id:05d}.pdf')
 
 
-    np.savez_compressed(output_file, spike_trains=spikes, seed=seed, seeds=seeds, place_cell=place_cell, config=config)
+    np.savez_compressed(output_file, spike_trains=spikes, seed=seed, seeds=seeds,
+                        place_cell=place_cell, middle_PF=middle_PF, config=config)
 
