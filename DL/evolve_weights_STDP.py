@@ -109,7 +109,14 @@ if __name__ == '__main__':
     connections = config['connectivity']
 
     synapses = {key: {} for key in set(connections['pre'])}
-    for k,(pre,post,prob) in enumerate(zip(connections['pre'], connections['post'], connections['prob'])):
+    has_conv_input = {key: {} for key in set(connections['pre'])}
+    rnd = np.random.uniform
+    for pre,post,prob,conv,sigma,n_pre in zip(connections['pre'],
+                                              connections['post'],
+                                              connections['prob'],
+                                              connections['conv'],
+                                              connections['sigma'],
+                                              connections['n_pre']):
         synapses[pre][post] = Synapses(spike_gen_group[pre], spike_gen_group[post],
                                        """
                                        w : 1
@@ -123,24 +130,32 @@ if __name__ == '__main__':
                                        on_post="""
                                        A_postsyn += Am
                                        w = clip(w + A_presyn, 0, wmax)
-                                       """)
-        if prob < 0:
-            pc_ratio = spike_times_config['place_cell_ratio'][pre]
-            pre_centers = np.linspace(0, n_cells[pre], n_cells[post]+2)[1:-1]
+                                       """,
+                                       name=f'{pre.replace("-","")}_to_{post.replace("-","")}')
+        has_conv_input[pre][post] = np.zeros(n_cells[post], dtype=bool)
+        if conv is not None:
+            print(f'{pre} -> {post} has convergent inputs.')
+            has_conv_input[pre][post] = rnd(size=n_cells[post]) <= conv
             x = np.arange(n_cells[pre])
-            n_pre = connections['n_pre'][k]
-            sigma = -prob
-            for j,mu in enumerate(pre_centers):
-                p = (n_pre / pc_ratio) / (sigma * np.sqrt(2*np.pi)) * np.exp(-0.5 * ((x - mu) / sigma)**2)
-                i, = np.where((np.random.uniform(size=n_cells[pre]) <= p) & place_cell[pre])
-                synapses[pre][post].connect(i=i, j=j)
-                print(f'Connected {i.size} presynaptic place cells to postsynaptic neuron #{j}.')
-        elif prob == 1:
-            synapses[pre][post].connect(i=np.arange(n_cells[pre]), j=np.arange(n_cells[post]))
+            pc_ratio = spike_times_config['place_cell_ratio'][pre]
+            for idx_post in range(n_cells[post]):
+                if has_conv_input[pre][post][idx_post]:
+                    # cell j has convergent input
+                    mu = int(idx_post / n_cells[post] * n_cells[pre])
+                    p = (n_pre / pc_ratio) / (sigma * np.sqrt(2*np.pi)) * np.exp(-0.5 * ((x - mu) / sigma)**2)
+                    idx_pre, = np.where((np.random.uniform(size=n_cells[pre]) <= p) & place_cell[pre])
+                    #print(f'Connecting {idx_pre.size} presynaptic place cells to postsynaptic neuron #{idx_post}.')
+                    synapses[pre][post].connect(i=idx_pre, j=idx_post)
+                else:
+                    # cell j does not have convergent input
+                    idx_pre, = np.where(rnd(size=n_cells[pre]) <= prob)
         else:
-            synapses[pre][post].connect(condition='i!=j', p=prob)
+            if pre == post:
+                synapses[pre][post].connect(condition='i!=j', p=prob)
+            else:
+                synapses[pre][post].connect(p=prob)
         synapses[pre][post].w = w_init
-        
+
     net = Network()
     for group in spike_gen_group.values():
         net.add(group)

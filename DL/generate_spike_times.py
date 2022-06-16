@@ -9,7 +9,10 @@ import numpy as np
 from numpy.random import RandomState, SeedSequence, MT19937
 import matplotlib.pyplot as plt
 
-from .utils import *
+try:
+    from .utils import *
+except:
+    from utils import *
 
 
 __all__ = ['pos', 'time_constant', 'firing_rate']

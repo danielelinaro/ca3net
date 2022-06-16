@@ -1,0 +1,23 @@
+{
+    "spike_times_file": "../files/spike_times_place_cells_ratio=0.5_0.0_conv.npz",
+    "t_end": 600,
+    "taup": 62.5,
+    "taum": 62.5,
+    "Ap": 4e-3,
+    "Am": 4e-3,
+    "wmax": 2e-8,
+    "scale_factor": 0.62,
+    "w_init": 1e-10,
+    "connectivity": {
+	"pre":  ["thorny", "thorny", "thorny",
+                 "a-thorny", "a-thorny", "a-thorny",
+		 "a-thorny_conv", "a-thorny_conv", "a-thorny_conv"],
+        "post": ["thorny", "a-thorny", "a-thorny_conv",
+		 "thorny", "a-thorny", "a-thorny_conv",
+		 "thorny", "a-thorny", "a-thorny_conv"],
+        "prob":  [0.1,  0.1,  0.1, 0.5,  0.1,  0.1,  0.5,  0.1,  0.1],
+	"conv":  [null, null, 1,   null, null, null, null, null, null],
+	"sigma": [null, null, 20,  null, null, null, null, null, null],
+	"n_pre": [null, null, 10,  null, null, null, null, null, null]
+    }
+}
