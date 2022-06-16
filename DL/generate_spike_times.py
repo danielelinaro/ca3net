@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     output_file = 'spike_times.npz'
     make_plots = False
-    n_place_cells_to_plot = 5
+    n_cells_to_plot = 5
     force = False
     
     while i < n_args:
@@ -118,6 +118,14 @@ if __name__ == '__main__':
     seeds = {}
     place_cell = {}
     spikes = {}
+
+    def pick(x, n):
+        try:
+            a = np.where(x)[0][np.linspace(0, x.sum(), n+2, dtype=np.int32)[1:-1]]
+        except:
+            a = np.array([])
+        return a
+
     for cell_type in cell_types:
         if center_PF is not None:
             middle = master_rs.normal(loc=center_PF[cell_type][0],
@@ -133,9 +141,10 @@ if __name__ == '__main__':
         phi_PF_rad[cell_type] = length_PF[cell_type] / (2 * np.pi)
         seeds[cell_type] = master_rs.randint(1000000, size=n_neurons[cell_type])
         place_cell[cell_type] = master_rs.uniform(size=n_neurons[cell_type]) < PC_ratio[cell_type]
-        place_cells_to_plot = np.random.permutation(np.where(place_cell[cell_type])[0])
-        if place_cells_to_plot.size > n_place_cells_to_plot:
-            place_cells_to_plot = place_cells_to_plot[:n_place_cells_to_plot]
+        cells_to_plot = np.concatenate((
+            pick(place_cell[cell_type], n_cells_to_plot),
+            pick(np.logical_not(place_cell[cell_type]), n_cells_to_plot),
+        ))
         random_states = [RandomState(MT19937(SeedSequence(seed))) for seed in seeds[cell_type]]
         tarp = refractory_period[cell_type]
         spikes[cell_type] = []
@@ -161,7 +170,7 @@ if __name__ == '__main__':
 
             spikes[cell_type].append(spks)
 
-            if make_plots and neuron_id in place_cells_to_plot:
+            if make_plots and neuron_id in cells_to_plot:
                 pos_fun = lambda times: [pos(t, animal_speed, track_length) for t in times]
                 edges = np.r_[0 : total_time : lap_time]
                 idx = np.digitize(all_spks, edges)

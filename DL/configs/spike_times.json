@@ -3,7 +3,7 @@
     "animal_speed": 32.43567842,
     "baseline_rate": {
 	"thorny": 0.1,
-	"a-thorny": 0.05
+	"a-thorny": 0.1
     },
     "max_rate": {
         "thorny": 20,
@@ -15,7 +15,7 @@
     },
     "place_cell_ratio": {
 	"thorny": 0.5,
-	"a-thorny": 0.2
+	"a-thorny": 0.0
     },
     "n_neurons": {
 	"thorny": 8000,

@@ -111,6 +111,11 @@ if __name__ == '__main__':
     synapses = {key: {} for key in set(connections['pre'])}
     has_conv_input = {key: {} for key in set(connections['pre'])}
     rnd = np.random.uniform
+    if 'conv' not in connections:
+        n_pairs = len(connections['pre'])
+        connections['conv'] = [None for _ in range(n_pairs)]
+        connections['sigma'] = [None for _ in range(n_pairs)]
+        connections['n_pre'] = [None for _ in range(n_pairs)]
     for pre,post,prob,conv,sigma,n_pre in zip(connections['pre'],
                                               connections['post'],
                                               connections['prob'],
