@@ -1,0 +1,27 @@
+{
+    "N_RS": 8000,
+    "N_IB": 2000,
+    "N_BC": 500,
+    "RS_config_file": "configs/RS.json",
+    "IB_config_file": "configs/IB.json",
+    "BC_config_file": "configs/FS.json",
+    "weights": "../files/weights_N=8000-2000_PC_ratio=0.5-0.0_p=0.1-0.1-0.1-0.1.npz",
+    "connectivity": {
+	"pre":  ["RS", "RS", "RS",
+                 "IB", "IB", "IB",
+                 "BC", "BC", "BC",
+	    	 "MF"],
+        "post": ["RS", "IB", "BC",
+                 "RS", "IB", "BC",
+                 "RS", "IB", "BC",
+		 "RS"],
+        "prob": [null, null, 0.1, null, null, 0.1, 0.25, 0.25, 0.25, -1],
+        "tau_rise": [1.3, 1.3, 1.0,  1.3, 1.3, 1.0, 0.3, 0.3, 0.25, 0.65],
+        "tau_decay": [9.5, 9.5, 4.1, 9.5, 9.5, 4.1, 3.3, 3.3, 1.2, 5.4],
+        "delay": [2.2, 2.2, 0.9, 2.2, 2.2, 0.9, 1.1, 1.1, 0.6, 0.0],
+	"transmitter": ["ampa", "ampa", "ampa",
+			"ampa", "ampa", "ampa",
+			"gaba", "gaba", "gaba",
+			"ampa"]
+    }
+}
