@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 BluePyOpt evaluator for optimization
 authors: Bence Bagi, András Ecker, Szabolcs Káli last update: 12.2021

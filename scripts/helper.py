@@ -18,7 +18,7 @@ nPCs = 8000
 nBCs = 150
 Erev_E = 0.0*mV
 Erev_I = -70.0*mV
-len_sim = 10000  # ms
+#len_sim = 10000  # ms
 volume_cond = 1e9*nS / 3.54e5  # 1/3.54 S/m (`_estimate_LFP()` assumes 10 um distance...)
 
 
@@ -80,10 +80,11 @@ def _estimate_LFP(StateM, subset):
     return t, LFP/mV
 
 
-def _avg_rate(rate, bin_, zoomed=False):
+def _avg_rate(rate, len_sim, bin_, zoomed=False):
     """
     Averages rate (used also for bar plots)
     :param rate: np.array representing firing rates (hard coded for 10000 ms simulations)
+    :param len_sim: length of the simulation
     :param bin_: bin size
     :param zoomed: bool for zoomed in plots
     """

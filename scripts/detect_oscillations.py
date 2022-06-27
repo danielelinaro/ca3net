@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 Functions used to analyse oscillations: filtering, AC, phase, PSD, checking for significant frequencies...
 authors: András Ecker, Bence Bagi, Eszter Vértes, Szabolcs Káli last update: 02.2019
@@ -38,9 +38,9 @@ def _calc_spectrum(time_series, fs, nperseg):
     return f, Pxx
 
 
-def analyse_rate(rate, fs, slice_idx=[]):
+def analyse_rate(rate, fs, slice_idx=None):
     """
-    Basic analysis of firing rate: autocorrelatio and PSD
+    Basic analysis of firing rate: autocorrelation and PSD
     :param rate: firing rate of the neuron population
     :param fs: sampling frequency (for the spectral analysis)
     :param slice_idx: time idx used to slice out high activity states (see `slice_high_activity()`)
@@ -49,12 +49,12 @@ def analyse_rate(rate, fs, slice_idx=[]):
              f, Pxx: sample frequencies and power spectral density (results of PSD analysis)
     """
 
-    if slice_idx:
+    if slice_idx is not None:
         t = np.arange(0, 10000); rates = []
         for bounds in slice_idx:  # iterate through sustained high activity periods
             lb = bounds[0]; ub = bounds[1]
             rates.append(rate[np.where((lb <= t) & (t < ub))[0]])
-        # AC and PSD are only analyised in the selected parts...
+        # AC and PSD are only analysed in the selected parts...
         rate_acs = [_autocorrelation(rate_tmp) for rate_tmp in rates]
         max_acs = [rate_ac[1:].max() for rate_ac in rate_acs]
         t_max_acs = [rate_ac[1:].argmax()+1 for rate_ac in rate_acs]
@@ -63,10 +63,10 @@ def analyse_rate(rate, fs, slice_idx=[]):
         f = PSDs[0][0]
         Pxxs = np.array([tmp[1] for tmp in PSDs])
         return np.mean(rate), rate_acs, np.mean(max_acs), np.mean(t_max_acs), f, Pxxs
-    else:
-        rate_ac = _autocorrelation(rate)
-        f, Pxx = _calc_spectrum(rate, fs=fs, nperseg=512)
-        return np.mean(rate), rate_ac, rate_ac[1:].max(), rate_ac[1:].argmax()+1, f, Pxx
+
+    rate_ac = _autocorrelation(rate)
+    f, Pxx = _calc_spectrum(rate, fs=fs, nperseg=512)
+    return np.mean(rate), rate_ac, rate_ac[1:].max(), rate_ac[1:].argmax()+1, f, Pxx
 
 
 def calc_TFR(rate, fs, slice_idx=[]):

@@ -62,10 +62,14 @@ AdEx_vars_units = {
 
 
 def run_net_sim(weight_matrixes, scaling_factors, syn_weights, poisson_rates,
-                   N_cells, cell_eqs, cell_pars, connectivity, tend=100*ms,
-                   Erev_E = 0*mV, Erev_I=-70*mV, z=1*nS, record_state=False,
-                   full_output=False, rnd_seed=None, verbose=False):
+                N_cells, cell_eqs, cell_pars, connectivity, tend=100,
+                Erev_E = 0, Erev_I=-70, z=1, record_state=False,
+                full_output=False, rnd_seed=None, verbose=False):
 
+    tend *= ms
+    Erev_E *= mV
+    Erev_I *= mV
+    z *= nS
     seed(rnd_seed)
 
     cell_types = list(N_cells.keys())
@@ -146,7 +150,7 @@ def run_net_sim(weight_matrixes, scaling_factors, syn_weights, poisson_rates,
                 synapses[pre][post].connect(p=prob)
             elif prob == -1:
                 poisson_groups[pre][post] = PoissonGroup(N_cells[post],
-                                                         poisson_rates[pre][post],
+                                                         poisson_rates[pre][post] * Hz,
                                                          name=f'poisson_{pre}_{post}')
                 if pre not in poisson_spike_monitors:
                     poisson_spike_monitors[pre] = {}
@@ -217,7 +221,8 @@ if __name__ == '__main__':
     N_cells = {cell_type: config[f'N_{cell_type}'] for cell_type in cell_types}
     cell_eqs = {cell_type: AdEx_eqs_with_MF.format(cell_type, *cell_types) if cell_type == 'RS' \
                 else AdEx_eqs_without_MF.format(cell_type, *cell_types) for cell_type in cell_types}
-    poisson_rates = {'MF': {'RS': 0.5 * Hz}}
+
+    poisson_rates = {'MF': {'RS': 0.5}}
     syn_weights = {
         'MF': {'RS': 40},
         'RS': {'BC': 10},
@@ -238,7 +243,7 @@ if __name__ == '__main__':
                                                                cell_eqs,
                                                                cell_pars,
                                                                config['connectivity'],
-                                                               tend=250*ms,
+                                                               tend=250,
                                                                record_state=True,
                                                                full_output=True,
                                                                rnd_seed=123456,

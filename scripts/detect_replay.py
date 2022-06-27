@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """
 Functions used to analyse sequence replay (see also `bayesian_decoding.py`)
 author: András Ecker, last update: 06.2019
@@ -10,7 +10,7 @@ from helper import _avg_rate, _get_consecutive_sublists, load_tuning_curves
 from bayesian_decoding import extract_binspikecount, calc_posterior, fit_trajectory, test_significance
 
 
-def slice_high_activity(rate, th, min_len, bin_=20):
+def slice_high_activity(rate, th, min_len, sim_dur, bin_=20):
     """
     Slices out high network activity - which will be candidates for replay detection
     :param rate: firing rate of the population
@@ -20,7 +20,7 @@ def slice_high_activity(rate, th, min_len, bin_=20):
     """
 
     assert min_len >= 128, "Spectral analysis won't work on sequences shorter than 128 ms"
-    idx = np.where(_avg_rate(rate, bin_) >= th)[0]
+    idx = np.where(_avg_rate(rate, sim_dur, bin_) >= th)[0]
     high_act = _get_consecutive_sublists(idx.tolist())
     slice_idx = []
     for tmp in high_act:
