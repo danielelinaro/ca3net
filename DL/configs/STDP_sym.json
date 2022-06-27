@@ -9,8 +9,8 @@
     "scale_factor": 0.62,
     "w_init": 1e-10,
     "connectivity": {
-	"pre":  ["thorny", "thorny",   "a-thorny", "a-thorny"],
-        "post": ["thorny", "a-thorny", "thorny",   "a-thorny"],
+	"pre":  ["RS", "RS",   "IB", "IB"],
+        "post": ["RS", "IB", "RS",   "IB"],
         "prob": [0.1, 0.1, 0.1, 0.1]
     }
 }

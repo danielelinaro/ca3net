@@ -6,7 +6,9 @@ import json
 import numpy as np
 from scipy import sparse
 from brian2 import *
-set_device('cpp_standalone')
+import platform
+if platform.system() == 'Linux':
+    set_device('cpp_standalone')
 
 prog_name = os.path.basename(sys.argv[0])
 

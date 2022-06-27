@@ -5,7 +5,11 @@ from itertools import chain
 import numpy as np
 import random as pyrandom
 from brian2 import *
-#prefs.codegen.target = "numpy"  #cython  # weave is not multiprocess-safe!
+import platform
+if platform.system() == 'Linux':
+    set_device('cpp_standalone')
+else:
+    prefs.codegen.target = 'numpy'  #cython  # weave is not multiprocess-safe!
 
 
 __all__ = ['AdEx_eqs_with_MF', 'AdEx_eqs_without_MF', 'AdEx_vars_units', 'run_net_sim']

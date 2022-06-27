@@ -2,28 +2,28 @@
     "track_length": 300,
     "animal_speed": 32.43567842,
     "baseline_rate": {
-	"thorny": 0.1,
-	"a-thorny": 0.1
+	"RS": 0.1,
+	"IB": 0.1
     },
     "max_rate": {
-        "thorny": 20,
-        "a-thorny": 20
+        "RS": 20,
+        "IB": 20
     },
     "place_field_length": {
-        "thorny": 30,
-        "a-thorny": 150
+        "RS": 30,
+        "IB": 150
     },
     "place_cell_ratio": {
-	"thorny": 0.5,
-	"a-thorny": 0.0
+	"RS": 0.5,
+	"IB": 0.0
     },
     "n_neurons": {
-	"thorny": 8000,
-	"a-thorny": 2000
+	"RS": 8000,
+	"IB": 2000
     },
     "refractory_period": {
-	"thorny": 5e-3,
-	"a-thorny": 2e-3
+	"RS": 5e-3,
+	"IB": 2e-3
     },
     "theta_frequency": 7,
     "total_time": 925
